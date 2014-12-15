@@ -1,0 +1,4 @@
+FsAdvent-fsharpAndGames
+=======================
+
+Complete solution
