@@ -9,7 +9,7 @@ using OpenTK.Audio.OpenAL;
 
 namespace InTheKeyOfCSharp
 {
-	public class SoundStuff
+	public class SounddySoundSound : IDisposable
 	{
 		private const int SamplingFrequency = 44100;
 
@@ -32,52 +32,68 @@ namespace InTheKeyOfCSharp
 		private int _audioSourceIndex;
 		private int _buffer;
 
-		private string _song = "F# F# G# F# B A#";
+		
 
-		public SoundStuff()
+		public SounddySoundSound()
 		{
 			_audioContext = new AudioContext();
 
 			_buffer = AL.GenBuffer();
 			_audioSourceIndex = AL.GenSource();
+		}
 
-			var notes = _song.Split(' ');
-			var data = new short[SamplingFrequency * notes.Length];
-			var dataOffset = 0;
-			var noteLength = 0.5f;
-			foreach (var note in notes)
-			{
-				var freq = _notes[note];
-				for (var i = 0; i < SamplingFrequency * noteLength; i++)
-				{
-					var factor = (2 * Math.PI * freq) / SamplingFrequency * i;
-					var sinf = Math.Sin(factor);
-
-					data[dataOffset + i] = (short)(sinf * short.MaxValue);
-				}
-
-				dataOffset += (int)(SamplingFrequency * noteLength);
-			}
-			
-			AL.BufferData(_buffer, ALFormat.Mono16, data, data.Length * 2, SamplingFrequency);
+		private void PlaySong(short[] data)
+		{
+			AL.BufferData(_buffer, ALFormat.Mono16, data, data.Length*2, SamplingFrequency);
 			AL.Source(_audioSourceIndex, ALSourcei.Buffer, _buffer);
-			
+
 			AL.SourcePlay(_audioSourceIndex);
 			Console.WriteLine(AL.GetError());
 
 			Console.ReadLine();
 		}
 
-		public void Play(object song)
+		private short[] SetSong(string song)
 		{
+			var notes = song.Split(' ');
+			var data = new short[SamplingFrequency*notes.Length];
+			var dataOffset = 0;
+			var noteLength = 0.5f;
+			foreach (var note in notes)
+			{
+				var freq = _notes[note];
+				for (var i = 0; i < SamplingFrequency*noteLength; i++)
+				{
+					var factor = (2*Math.PI*freq)/SamplingFrequency*i;
+					var sinf = Math.Sin(factor);
 
+					data[dataOffset + i] = (short) (sinf*short.MaxValue);
+				}
+
+				dataOffset += (int) (SamplingFrequency*noteLength);
+			}
+			return data;
+		}
+
+		public void Play(string song)
+		{
+			short[] songFrequencies = SetSong(song);
+			PlaySong(songFrequencies);
+		}
+
+
+		public void Dispose()
+		{
+			
 		}
 	}
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			var sound = new SoundStuff();
+			const string song = "F# F# G# F# B A#";
+			var sound = new SounddySoundSound();
+			sound.Play(song);
 		}
 	}
 }
